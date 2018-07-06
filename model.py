@@ -62,6 +62,8 @@ class Rating(db.Model):
                             backref=db.backref("ratings",
                                                order_by=rating_id))
 
+
+
     def __repr__(self):
         """Provide helpful representation when printed."""
 

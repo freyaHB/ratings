@@ -16,7 +16,7 @@ app.secret_key = "ABC"
 # Normally, if you use an undefined variable in Jinja2, it fails
 # silently. This is horrible. Fix this so that, instead, it raises an
 # error.
-app.jinja_env.undefined = StrictUndefined(name='foo')
+app.jinja_env.undefined = StrictUndefined()
 
 
 @app.route('/')
@@ -47,9 +47,40 @@ def register_process():
         db.session.commit()
     return redirect("/")
 
-    
+@app.route('/user-login', methods=["GET"])
+def login_form():
+    return render_template("login_form.html")
 
-            
+@app.route("/user-login", methods=["POST"])
+def handle_login():
+    """logs an existing user in after they register"""
+    user_email = request.form.get('email')
+    password = request.form.get('password')
+     #user_id = User.query.filter(User.email)
+
+    query = User.query.filter(User.email==user_email, User.password == password).first()
+
+    if query:
+        session['email'] = user_email
+        session['user_id'] = query.user_id
+        flash("Logged in as %s" % user_email)
+        return redirect("/")
+    else:
+        flash("Wrong password!")
+        return redirect("/user-login")        
+
+@app.route('/users/<user_id>')
+def show_user_profile(user_id):
+    user = User.query.filter(User.user_id == user_id).first()
+    age = user.age
+    zipcode = user.zipcode
+
+    #return "Profile page for user: {}".format(user_id)
+    return render_template("users.html", user=user, age=age, zipcode=zipcode)
+
+     
+
+                
 
 
 
