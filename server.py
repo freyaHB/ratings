@@ -39,6 +39,7 @@ def register_form():
 def register_process():
     user_email = request.form.get("email")
     password = request.form.get("password")
+
     query = User.query.filter(User.email == user_email).first()
     
     if query is None:
@@ -58,28 +59,50 @@ def handle_login():
     password = request.form.get('password')
      #user_id = User.query.filter(User.email)
 
-    query = User.query.filter(User.email==user_email, User.password == password).first()
+    #query = User.query.filter(User.email==user_email, User.password == password).first()
+    user = User.query.filter(User.email == user_email).first()
 
-    if query:
-        session['email'] = user_email
-        session['user_id'] = query.user_id
-        flash("Logged in as %s" % user_email)
-        return redirect("/")
-    else:
-        flash("Wrong password!")
-        return redirect("/user-login")        
+    if user is not None:
+        if user.password == password:
+            session["user_name"] = user.user_id
+            flash("Logged in")
+            return redirect("/")
+        else: 
+            flash("Password is incorrect!")
+            return redirect("/user-login")
+    else: 
+        flash("Incorrect email, please register")
+        return redirect ("/register")        
+
+    # if query:
+    #     session['email'] = user_email
+    #     session['user_id'] = query.user_id
+    #     flash("Logged in as %s" % user_email)
+    #     return redirect("/")
+    # else:
+    #     flash("Wrong password!")
+    #     return redirect("/user-login")        
 
 @app.route('/users/<user_id>')
 def show_user_profile(user_id):
     user = User.query.filter(User.user_id == user_id).first()
-    age = user.age
-    zipcode = user.zipcode
+    #age = user.age
+    #zipcode = user.zipcode
 
     #return "Profile page for user: {}".format(user_id)
-    return render_template("users.html", user=user, age=age, zipcode=zipcode)
+    return render_template("user_info.html", user=user)
 
-     
+@app.route('/movies')
+def show_movie_list():
+    movies = Movie.query.order_by(Movie.title).all()
 
+    return render_template("movie_list.html", movies=movies)
+
+@app.route('/movie/<movie_id>')
+def display_movie_page(movie_id):
+    movie_info = Movie.query.filter(Movie.movie_id == movie_id).first()
+
+    return render_template("movie_info.html", movie_info=movie_info)
                 
 
 
